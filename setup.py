@@ -50,8 +50,10 @@ cleaning parameter and query strings, and a little more sanitization.
 		'Intended Audience :: Developers',
 		'Topic :: Internet :: WWW/HTTP'],
 	install_requires = [
+		'publicsuffix2'
+	],
+	tests_require = [
 		'coverage',
 		'nose',
-		'publicsuffix2'
 	]
 )
