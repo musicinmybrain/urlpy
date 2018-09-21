@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pkgutil
-import unittest
 
 import six
-from nose.tools import assert_equal, assert_not_equal, assert_raises, assert_is_instance
+from nose.tools import (
+    assert_equal, assert_not_equal, assert_raises, assert_is_instance,
+    raises)
 
 import url
 from url.url import StringURL, UnicodeURL
@@ -665,6 +666,11 @@ def test_set_psl():
     for rules, example, pld, tld in examples:
         yield test, rules, example, pld, tld
 
+@raises(ValueError)
+def test_psl_exception():
+    '''Raises ValueError when PSL code throws.'''
+    url.parse('http://empty..com').pld
+
 def test_tel():
     '''Can parse tel links properly.'''
     parsed = url.parse('tel:0108202201')
@@ -689,7 +695,7 @@ def test_component_assignment():
     parsed.query = 'no-query'
     parsed.fragment = 'no-fragment'
     assert_equal(
-        parsed.unicode, 
+        parsed.unicode,
         'https://username@foo.example.com:443/another/path;no-params?no-query#no-fragment'
     )
 
@@ -704,7 +710,7 @@ def test_component_assignment_unicode():
     parsed.query = u'no-query'
     parsed.fragment = u'no-fragment'
     assert_equal(
-        parsed.unicode, 
+        parsed.unicode,
         'https://username@foo.example.com:443/another/path;no-params?no-query#no-fragment'
     )
 
