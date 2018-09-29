@@ -27,16 +27,17 @@ except ImportError:
 	from distutils.core import setup
 
 setup(
-	name             = 'url',
+	name             = 'urlpy',
 	version          = '0.2.0.1',
 	description      = 'URL Parsing',
 	long_description = '''
-Some helper functions for parsing URLs, sanitizing them, normalizing them.
+Some helper functions for parsing URLs, sanitizing them, normalizing them in pure python.
 
 This includes support for escaping, unescaping, punycoding, unpunycoding,
 cleaning parameter and query strings, and a little more sanitization.
 
-This is a local modified version that uses publixsuffix2 instead
+This is a fork or the "url" module by moz.com that is pure python and use another
+publixsuffix module "publixsuffix2".
 ''',
 	author           = 'Dan Lecocq',
 	author_email     = 'dan@seomoz.org',
