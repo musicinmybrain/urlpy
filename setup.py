@@ -35,6 +35,8 @@ Some helper functions for parsing URLs, sanitizing them, normalizing them.
 
 This includes support for escaping, unescaping, punycoding, unpunycoding,
 cleaning parameter and query strings, and a little more sanitization.
+
+This is a local modified version that uses publixsuffix2 instead
 ''',
 	author           = 'Dan Lecocq',
 	author_email     = 'dan@seomoz.org',
