@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #
+# Copyright (c) 2018 nexB, Inc.
 # Copyright (c) 2012-2013 SEOmoz, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -21,7 +22,11 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-'''This is a module for dealing with urls. In particular, sanitizing them.'''
+'''This is a module for dealing with urls. In particular, sanitizing them.
+This version is a friendly fork of the upstream from Moz to keep a pure Python
+version around to run on Python 2.7 and all OSes.
+It also uses an alternate publicsuffix list provider package.
+'''
 
 import re
 import codecs
@@ -32,9 +37,8 @@ except ImportError:  # pragma: no cover
     # Python 3 support
     import urllib.parse as urlparse
 
-# For publicsuffix utilities
-from publicsuffix import PublicSuffixList
-psl = PublicSuffixList()
+import publicsuffix2 as psl
+
 
 # Come codes that we'll need
 IDNA = codecs.lookup('idna')
@@ -135,11 +139,11 @@ class URL(object):
         _other.canonical().defrag().abspath().escape().punycode()
 
         result = (
-            _self.scheme    == _other.scheme    and
-            _self.host      == _other.host      and
-            _self.path      == _other.path      and
-            _self.params    == _other.params    and
-            _self.query     == _other.query)
+            _self.scheme == _other.scheme    and
+            _self.host == _other.host      and
+            _self.path == _other.path      and
+            _self.params == _other.params    and
+            _self.query == _other.query)
 
         if result:
             if _self.port and not _other.port:
@@ -158,14 +162,14 @@ class URL(object):
         if isinstance(other, basestring):
             return self.__eq__(self.parse(other, 'utf-8'))
         return (
-            self.scheme    == other.scheme    and
-            self.host      == other.host      and
-            self.path      == other.path      and
-            self.port      == other.port      and
-            self.params    == other.params    and
-            self.query     == other.query     and
-            self.fragment  == other.fragment  and
-            self.userinfo  == other.userinfo)
+            self.scheme == other.scheme    and
+            self.host == other.host      and
+            self.path == other.path      and
+            self.port == other.port      and
+            self.params == other.params    and
+            self.query == other.query     and
+            self.fragment == other.fragment  and
+            self.userinfo == other.userinfo)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -174,7 +178,7 @@ class URL(object):
         return self.utf8
 
     def __repr__(self):
-        return '<url.URL object "%s" >' % self.utf8
+        return '<urlpy.URL object "%s" >' % self.utf8
 
     def canonical(self):
         '''Canonicalize this url. This includes reordering parameters and args
@@ -382,3 +386,7 @@ class URL(object):
     def utf8(self):
         '''Return a utf-8 version of this url'''
         return self.encode('utf-8')
+
+
+StringURL = URL
+UnicodeURL = None

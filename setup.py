@@ -21,42 +21,36 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-try:
-	from setuptools import setup
-except ImportError:
-	from distutils.core import setup
+from setuptools import setup
+
 
 setup(
-	name             = 'urlpy',
-	version          = '0.2.0.1',
-	description      = 'URL Parsing',
-	long_description = '''
+    name='urlpy',
+    version='0.2.0.2',
+    description='URL Parsing',
+    long_description='''
 Some helper functions for parsing URLs, sanitizing them, normalizing them in pure python.
 
 This includes support for escaping, unescaping, punycoding, unpunycoding,
 cleaning parameter and query strings, and a little more sanitization.
 
-This is a fork or the "url" module by moz.com that is pure python and use another
-publixsuffix module "publixsuffix2".
+This version is a friendly fork of the upstream from Moz to keep a pure Python
+version around to run on Python 2.7 and all OSes.
+It also uses an alternate publicsuffix list provider package.
+
 ''',
-	author           = 'Dan Lecocq',
-	author_email     = 'dan@seomoz.org',
-	url              = 'http://github.com/seomoz/url-py',
-	py_modules       = ['url'],
-	license          = 'MIT',
-	platforms        = 'Posix; MacOS X',
-	test_suite       = 'tests.testReppy',
-	classifiers      = [
-		'License :: OSI Approved :: MIT License',
-		'Development Status :: 3 - Alpha',
-		'Environment :: Web Environment',
-		'Intended Audience :: Developers',
-		'Topic :: Internet :: WWW/HTTP'],
-	install_requires = [
-		'publicsuffix2'
-	],
-	tests_require = [
-		'coverage',
-		'nose',
-	]
+    author='Dan Lecocq',
+    author_email='dan@seomoz.org',
+    url='http://github.com/nexB/url-py',
+    py_modules=['urlpy'],
+    license='MIT',
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Development Status :: 3 - Alpha',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'Topic :: Internet :: WWW/HTTP'],
+    install_requires=[
+        'publicsuffix2'
+    ],
 )
