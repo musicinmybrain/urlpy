@@ -47,12 +47,25 @@ try:
     from urllib.parse import unquote as urllib_unquote
 except ImportError:
     from urllib import quote as urllib_quote
-    from urllib import quote as urllib_unquote
+    from urllib import unquote as urllib_unquote
+
+
+try:
+    unicode
+    str = unicode
+except NameError:
+    unicode = str
+
 
 # Python versions
 _sys_v0 = sys.version_info[0]
 py2 = _sys_v0 == 2
 py3 = _sys_v0 == 3
+
+
+# For publicsuffix utilities
+from publicsuffix2 import PublicSuffixList
+psl = PublicSuffixList()
 
 
 # Come codes that we'll need
@@ -82,19 +95,19 @@ class URL(object):
     '''
 
     # Via http://www.ietf.org/rfc/rfc3986.txt
-    GEN_DELIMS = ":/?#[]@"
-    SUB_DELIMS = "!$&'()*+,;="
-    ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    DIGIT = "0123456789"
-    UNRESERVED = ALPHA + DIGIT + "-._~"
-    RESERVED = GEN_DELIMS + SUB_DELIMS
-    PCHAR = UNRESERVED + SUB_DELIMS + ":@"
-    PATH = PCHAR + "/"
-    QUERY = PCHAR + "/?"
-    FRAGMENT = PCHAR + "/?"
-    USERINFO = UNRESERVED + SUB_DELIMS + ":"
+    _GEN_DELIMS = ":/?#[]@"
+    _SUB_DELIMS = "!$&'()*+,;="
+    _ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    _DIGIT = "0123456789"
+    _UNRESERVED = _ALPHA + _DIGIT + "-._~"
+    _RESERVED = _GEN_DELIMS + _SUB_DELIMS
+    _PCHAR = _UNRESERVED + _SUB_DELIMS + ":@"
+    PATH = (_PCHAR + "/").encode('utf-8')
+    QUERY = (_PCHAR + "/?").encode('utf-8')
+    FRAGMENT = (_PCHAR + "/?").encode('utf-8')
+    USERINFO = (_UNRESERVED + _SUB_DELIMS + ":").encode('utf-8')
 
-    PERCENT_ESCAPING_RE = re.compile('(%([a-fA-F0-9]{2})|.)', re.S)
+    PERCENT_ESCAPING_RE = re.compile(r'(%([a-fA-F0-9]{2})|.)', re.S)
 
     @classmethod
     def parse(cls, url):
@@ -143,10 +156,10 @@ class URL(object):
     def equiv(self, other):
         '''Return true if this url is equivalent to another'''
         _other = self.parse(other)
-        _other = _other.canonical().defrag().abspath().escape()
+        _other.canonical().defrag().abspath().escape().punycode()
 
         _self = self.parse(self)
-        _self = _self.canonical().defrag().abspath().escape()
+        _self.canonical().defrag().abspath().escape().punycode()
 
         result = (
             _self.scheme == _other.scheme    and
@@ -183,8 +196,27 @@ class URL(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __str__(self):
+        netloc = self.host or ''
+        if self.port:
+            netloc += (':' + str(self.port))
+
+        if self.userinfo is not None:
+            netloc = '{}@{}'.format(self.userinfo, netloc)
+
+        result = urlparse.urlunparse((
+            str(self.scheme),
+            str(netloc),
+            str(self.path),
+            str(self.params),
+            str(self.query),
+            self.fragment))
+        if isinstance(result, bytes):
+            result = result.decode('utf-8')
+        return result
+
     def __repr__(self):
-        return '<urlpy.URL object "{}" >'.format(self)
+        return '<urlpy.URL object "{}">'.format(str(self))
 
     def canonical(self):
         '''Canonicalize this url. This includes reordering parameters and args
@@ -256,61 +288,86 @@ class URL(object):
             self.port = None
         return self
 
-    def escape(self, *args, **kwargs):
+    def escape(self):
         '''Make sure that the path is correctly escaped'''
-        self.path = urllib_quote(
-            urllib_unquote(self.path), safe=URL.PATH)
+        upath = urllib_unquote(self.path).encode('utf-8')
+        self.path = urllib_quote(upath, safe=URL.PATH)
+        if py2:
+            self.path = self.path.decode('utf-8')
+
         # Safe characters taken from:
         #    http://tools.ietf.org/html/rfc3986#page-50
-        self.query = urllib_quote(urllib_unquote(self.query),
-            safe=URL.QUERY)
+        uquery = urllib_unquote(self.query).encode('utf-8')
+        self.query = urllib_quote(uquery, safe=URL.QUERY)
+        if py2:
+            self.query = self.query.decode('utf-8')
+
         # The safe characters for URL parameters seemed a little more vague.
         # They are interpreted here as *pchar despite this page, since the
         # updated RFC seems to offer no replacement
         #    http://tools.ietf.org/html/rfc3986#page-54
-        self.params = urllib_quote(urllib_unquote(self.params),
-            safe=URL.QUERY)
+        uparams = urllib_unquote(self.params).encode('utf-8')
+        self.params = urllib_quote(uparams, safe=URL.QUERY)
+        if py2:
+            self.params = self.params.decode('utf-8')
+
         if self.userinfo:
-            self.userinfo = urllib_quote(urllib_unquote(self.userinfo),
-                safe=URL.USERINFO)
+            uuserinfo = urllib_unquote(self.userinfo).encode('utf-8')
+            self.userinfo = urllib_quote(uuserinfo, safe=URL.USERINFO)
+            if py2:
+                self.userinfo = self.userinfo.decode('utf-8')
         return self
 
     def unescape(self):
         '''Unescape the path'''
-        self.path = urllib_unquote(self.path)
+        path = self.path
+        if py2:
+            path = self.path.encode('utf-8')
+        path = urllib_unquote(path)
+        if py2:
+            path = path.decode('utf-8')
+        self.path = path
         return self
 
-    def __str__(self):
-        '''Return the url in an arbitrary encoding'''
-        netloc = self.host or ''
-        if self.port:
-            netloc += (':' + str(self.port))
+    def relative(self, path):
+        '''Evaluate the new path relative to the current url'''
+        newurl = urlparse.urljoin(str(self), path)
+        return URL.parse(newurl)
 
-        if self.userinfo is not None:
-            netloc = '%s@%s' % (self.userinfo, netloc)
+    def punycode(self):
+        '''Convert to punycode hostname'''
+        if self.host:
+            self.host = (IDNA.encode(self.host)[0]).decode('utf-8')
+            return self
+        raise TypeError('Cannot punycode a relative url (%s)' % repr(self))
 
-        result = urlparse.urlunparse((
-            str(self.scheme),
-            str(netloc),
-            str(self.path),
-            str(self.params),
-            str(self.query),
-            self.fragment))
-        if isinstance(result, bytes):
-            result = result.decode('utf-8')
-        return result
+    def unpunycode(self):
+        '''Convert to an unpunycoded hostname'''
+        if self.host:
+            self.host = IDNA.decode(self.host.encode('utf-8'))[0]
+            return self
+        raise TypeError('Cannot unpunycode a relative url (%s)' % repr(self))
 
-    ###########################################################################
-    # Information about the domain
-    ###########################################################################
     @property
     def hostname(self):
         '''Return the hostname of the url.'''
         return self.host or ''
 
-    ###########################################################################
-    # Information about the type of url it is
-    ###########################################################################
+    @property
+    def pld(self):
+        '''Return the 'pay-level domain' of the url
+            (http://moz.com/blog/what-the-heck-should-we-call-domaincom)'''
+        if self.host:
+            return psl.get_public_suffix(self.host)
+        return ''
+
+    @property
+    def tld(self):
+        '''Return the top-level domain of a url'''
+        if self.host:
+            return '.'.join(self.pld.split('.')[1:])
+        return ''
+
     @property
     def absolute(self):
         '''Return True if this is a fully-qualified URL with a hostname and
@@ -319,4 +376,5 @@ class URL(object):
 
     @property
     def unicode(self):
+        '''Return a utf-8 version of this url'''
         return str(self)

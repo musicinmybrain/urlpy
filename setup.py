@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Copyright (c) nexB, Inc.
-# Copyright (c) 2012-2013 SEOmoz, Inc.
+# Copyright (c) 2012-2015 SEOmoz, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -48,4 +48,7 @@ version around to run on Python 2 and 3 and all OSes.
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP'],
+    install_requires=[
+        'publicsuffix2',
+    ],
 )

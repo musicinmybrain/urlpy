@@ -29,8 +29,6 @@ from __future__ import unicode_literals
 
 import sys
 import urlpy as url
-import unittest
-from unittest.case import skipIf
 
 try:
     # Python 2
@@ -48,16 +46,20 @@ py2 = _sys_v0 == 2
 py3 = _sys_v0 == 3
 
 
-class Dummy(unittest.TestCase):
-    def nop(self):
+def assert_equal(a, b):
+    assert a == b
+
+
+def assert_not_equal(a, b):
+    assert a != b
+
+
+def assert_raises(e, f):
+    try:
+        f()
+        raise Exception('Exception not raised')
+    except e:
         pass
-
-_tc = Dummy('nop')
-
-
-assert_equal = _tc.assertEqual
-assert_not_equal = _tc.assertNotEqual
-assert_raises = _tc.assertRaises
 
 
 def test_deparam_sane():
@@ -165,7 +167,6 @@ def test_abspath():
         test(bad, good)
 
 
-@skipIf(py2, 'Fails on Python2 for strings vs unicode issues not worth solving')
 def test_escape():
     def test(bad, good):
         assert_equal(url.parse(bad).escape().unicode, good)
@@ -216,22 +217,16 @@ def test_userinfo():
 def test_not_equal():
     def test(first, second):
         # None of these examples should evaluate as strictly equal
-        assert_not_equal(url.parse(first), url.parse(second),
-            'URL(%s) should not equal URL(%s)' % (first, second))
+        assert_not_equal(url.parse(first), url.parse(second))
         # Using a string
-        assert_not_equal(url.parse(first), second,
-            'URL(%s) should not equal %s' % (first, second))
+        assert_not_equal(url.parse(first), second,)
         # Symmetric
-        assert_not_equal(url.parse(second), url.parse(first),
-            'URL(%s) should not equal URL(%s)' % (second, first))
+        assert_not_equal(url.parse(second), url.parse(first),)
         # Using a string, symmetric
-        assert_not_equal(url.parse(second), first,
-            'URL(%s) should not equal %s' % (second, first))
+        assert_not_equal(url.parse(second), first,)
         # Should equal self
-        assert_equal(url.parse(first), first,
-            'URL(%s) should equal itself' % first)
-        assert_equal(url.parse(second), second,
-            'URL(%s) should equal itself' % second)
+        assert_equal(url.parse(first), first,)
+        assert_equal(url.parse(second), second,)
 
     # These examples should not work. This includes all the examples from equivalence
     # test as well.
@@ -258,7 +253,6 @@ def test_not_equal():
         test(first, second)
 
 
-@skipIf(py2, 'Fails on Python2 for strings vs unicode issues not worth solving')
 def test_equiv():
     def test(first, second):
         # Equiv with another URL object
@@ -282,12 +276,17 @@ def test_equiv():
         ('http://foo.com:80'         , 'http://foo.com/'),
         ('https://foo.com:443'       , 'https://foo.com/'),
         ('http://foo.com/?b=2&&&&a=1', 'http://foo.com/?a=1&b=2'),
-        ('http://foo.com/%A2%B3'     , 'http://foo.com/%a2%b3'),
         ('http://foo.com/a/../b/.'   , 'http://foo.com/b/'),
         ('http://user:pass@foo.com/' , 'http://foo.com/'),
         ('http://just-user@foo.com/' , 'http://foo.com/')
     ]
+    if py3:
+        examples += [
+        ('http://foo.com/%A2%B3'     , 'http://foo.com/%a2%b3'),
+        (u'http://www.kündigen.de/'  , 'http://www.xn--kndigen-n2a.de/'),
+        (u'http://www.kündiGen.DE/'  , 'http://www.xn--kndigen-n2a.de/'),
 
+    ]
     for first, second in examples:
         test(first, second)
 
@@ -307,22 +306,16 @@ def test_not_equiv():
         assert url.parse(second).equiv(second)
 
         # None of these examples should evaluate as strictly equal
-        assert_not_equal(url.parse(first), url.parse(second),
-            'URL(%s) should not equal URL(%s)' % (first, second))
+        assert_not_equal(url.parse(first), url.parse(second))
         # Using a string
-        assert_not_equal(url.parse(first), second,
-            'URL(%s) should not equal %s' % (first, second))
+        assert_not_equal(url.parse(first), second,)
         # Symmetric
-        assert_not_equal(url.parse(second), url.parse(first),
-            'URL(%s) should not equal URL(%s)' % (second, first))
+        assert_not_equal(url.parse(second), url.parse(first),)
         # Using a string, symmetric
-        assert_not_equal(url.parse(second), first,
-            'URL(%s) should not equal %s' % (second, first))
+        assert_not_equal(url.parse(second), first,)
         # Should equal self
-        assert_equal(url.parse(first), first,
-            'URL(%s) should equal itself' % first)
-        assert_equal(url.parse(second), second,
-            'URL(%s) should equal itself' % second)
+        assert_equal(url.parse(first), first,)
+        assert_equal(url.parse(second), second,)
 
     # Now some examples that should /not/ pass
     examples = [
@@ -330,20 +323,21 @@ def test_not_equiv():
         ('http://foo.com:8080'       , 'http://foo.com/'),
         ('https://foo.com:4430'      , 'https://foo.com/'),
         ('http://foo.com?page&foo'   , 'http://foo.com/?page'),
-        ('http://foo.com/?b=2&c&a=1' , 'http://foo.com/?a=1&b=2'),
-        ('http://foo.com/%A2%B3%C3'  , 'http://foo.com/%a2%b3'),
-        (u'http://www.kündïgen.de/'  , 'http://www.xn--kndigen-n2a.de/')
+        ('http://foo.com/?b=2&c&a=1' , 'http://foo.com/?a=1&b=2')
     ]
-
+    if py3:
+        examples += [
+            ('http://foo.com/%A2%B3%C3'  , 'http://foo.com/%a2%b3'),
+            (u'http://www.kündïgen.de/'  , 'http://www.xn--kndigen-n2a.de/')
+        ]
     for first, second in examples:
-        test(first, second)
+        test(first, second), (first, second)
 
 
 def test_str_repr():
     def test(first, second):
         assert_equal(str(url.parse(toparse)), strng)
-        assert_equal(repr(url.parse(toparse)),
-            '<urlpy.URL object "%s" >' % strng)
+        assert_equal(repr(url.parse(toparse)), '<urlpy.URL object "%s">' % strng)
 
     examples = [
         ('http://foo.com/', 'http://foo.com/'),
@@ -397,7 +391,61 @@ def test_deuserinfo():
         test(bad, good)
 
 
-@skipIf(py2, 'Fails on Python2 for strings vs unicode issues not worth solving')
+def test_punycode():
+    def test(uni, puny):
+        assert_equal(url.parse(uni).escape().punycode().unicode, puny)
+        # Also make sure punycode is idempotent
+        assert_equal(url.parse(uni).escape().punycode().punycode().unicode, puny)
+        # Make sure that we can reverse the procedure correctly
+        assert_equal(url.parse(uni).escape().punycode().unpunycode().unescape(), uni)
+        # And we get what we'd expect going the opposite direction
+        assert_equal(url.parse(puny).unescape().unpunycode().unicode, uni)
+
+    examples = [
+        (u'http://www.kündigen.de/',
+            u'http://www.xn--kndigen-n2a.de/'),
+        (u'http://россия.иком.museum/',
+            u'http://xn--h1alffa9f.xn--h1aegh.museum/'),
+        (u'http://россия.иком.museum/испытание.html',
+            u'http://xn--h1alffa9f.xn--h1aegh.museum/%D0%B8%D1%81%D0%BF%D1%8B%D1%82%D0%B0%D0%BD%D0%B8%D0%B5.html')
+    ]
+
+    for uni, puny in examples:
+        test(uni, puny)
+
+
+def test_punycode_relative_urls():
+    def test(relative):
+        assert_raises(TypeError, url.parse(relative).punycode)
+        assert_raises(TypeError, url.parse(relative).unpunycode)
+
+    # Make sure that we can't punycode or unpunycode relative urls
+    examples = ['foo', '../foo', '/bar/foo']
+    for relative in examples:
+        test(relative)
+
+
+def test_relative():
+    def test(rel, absolute):
+        assert_equal(base.relative(rel).unicode, absolute)
+
+    base = url.parse('http://testing.com/a/b/c')
+    examples = [
+        (u'../foo'            , u'http://testing.com/a/foo'),
+        (u'./foo'             , u'http://testing.com/a/b/foo'),
+        (u'foo'               , u'http://testing.com/a/b/foo'),
+        (u'/foo'              , u'http://testing.com/foo'),
+        (u'http://foo.com/bar', u'http://foo.com/bar'),
+        (u'/foo'              , u'http://testing.com/foo'),
+        (u'/\u200Bfoo'        , u'http://testing.com/\u200Bfoo'),
+        (u'http://www\u200B.tiagopriscostudio.com',
+            u'http://www\u200B.tiagopriscostudio.com/')
+    ]
+
+    for rel, absolute in examples:
+        test(rel, absolute)
+
+
 def test_sanitize():
     def test(bad, good):
         assert_equal(url.parse(bad).sanitize().unicode, good)
@@ -454,6 +502,31 @@ def test_hostname():
     for query, result in examples:
         test(query, result)
 
+
+def test_pld():
+    def test(query, result):
+        assert_equal(url.parse(query).pld, result)
+
+    examples = [
+        ('http://foo.com/bar'    , 'foo.com'),
+        ('http://bar.foo.com/bar', 'foo.com'),
+        ('/foo'                  , '')
+    ]
+    for query, result in examples:
+        test(query, result)
+
+
+def test_tld():
+    def test(query, result):
+        assert_equal(url.parse(query).tld, result)
+
+    examples = [
+        ('http://foo.com/bar'    , 'com'),
+        ('http://bar.foo.com/bar', 'com'),
+        ('/foo'                  , '')
+    ]
+    for query, result in examples:
+        test(query, result)
 
 
 def test_empty_hostname():
