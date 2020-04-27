@@ -8,4 +8,4 @@ install:
     - pip install -e .
 
 script:
-    - py.test -vvs test.py
+    - pytest -vvs test_urlpy.py

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# Copyright (c) nexB, Inc.
 # Copyright (c) 2012-2013 SEOmoz, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining
@@ -26,22 +27,19 @@ from setuptools import setup
 
 setup(
     name='urlpy',
-    version='0.2.0.2',
-    description='URL Parsing',
+    version='0.1',
+    description='Simple URL parsing and equivalence',
     long_description='''
 Some helper functions for parsing URLs, sanitizing them, normalizing them in pure python.
 
-This includes support for escaping, unescaping, punycoding, unpunycoding,
-cleaning parameter and query strings, and a little more sanitization.
+This includes support for escaping, unescaping, cleaning parameter and query strings, 
+and a little more sanitization.
 
 This version is a friendly fork of the upstream from Moz to keep a pure Python
-version around to run on Python 2.7 and all OSes.
-It also uses an alternate publicsuffix list provider package.
-
+version around to run on Python 2 and 3 and all OSes.
 ''',
-    author='Dan Lecocq',
-    author_email='dan@seomoz.org',
-    url='http://github.com/nexB/url-py',
+    author='nexB Inc (based on code from Dan Lecocq)',
+    url='http://github.com/nexB/urlpy',
     py_modules=['urlpy'],
     license='MIT',
     classifiers=[
@@ -50,7 +48,4 @@ It also uses an alternate publicsuffix list provider package.
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP'],
-    install_requires=[
-        'publicsuffix2'
-    ],
 )

@@ -1,16 +1,10 @@
 URL
 ===
-URL parsing done reasonably.
+Minimal URL parsing and cleanup.
 
-[![Build Status](https://secure.travis-ci.org/seomoz/url-py.png)](http://travis-ci.org/seomoz/url-py)
-![Status: Production](https://img.shields.io/badge/status-production-green.svg?style=flat)
-![Team: Big Data](https://img.shields.io/badge/team-big_data-green.svg?style=flat)
-![Scope: External](https://img.shields.io/badge/scope-external-green.svg?style=flat)
-![Open Source: MIT](https://img.shields.io/badge/open_source-MIT-green.svg?style=flat)
-![Critical: Yes](https://img.shields.io/badge/critical-yes-red.svg?style=flat)
+This is derived from from Moz url.py and simplified to run on Python 2 and
+Python 3 using a pure Python library.
 
-Moz crawls. We crawl lots. In fact, you might say that crawling is our
-business.
 
 The internet's also a messy place. We've encountered some pretty crazy
 implementations and servers and URLs and HTML. Over the course of this
@@ -142,29 +136,6 @@ you can unescape the path:
     >>> print url.parse('http://foo.com/%C3%BCmlaut').unescape().unicode()
     http://foo.com/ümlaut
 
-`relative`
-----------
-Evaluate a relative path given a base url:
-
-    >>> url.parse('http://foo.com/a/b/c').relative('../foo').utf8()
-    'http://foo.com/a/foo'
-
-`punycode`
-----------
-For non-ASCII hostnames, they must be punycoded before a DNS request is made
-for them. To this end, there's the punycode function:
-
-    >>> url.parse('http://ümlaut.com').punycode().utf8()
-    'http://xn--mlaut-jva.com/'
-
-`unpunycode`
-------------
-If a url may have been punycoded before it's been handed to you, and you'd like
-to be able to display something nicer than `http://xn--mlaut-jva.com/`:
-
-    >>> print url.parse('http://xn--mlaut-jva.com/').unpunycode().utf8()
-    http://ümlaut.com/
-
 Other Functions
 ===============
 Not all functions are chainable -- some return a value other than a `URL` object:
@@ -189,30 +160,7 @@ Many attributes are available on URL objects:
 - `fragment` -- empty string if absent
 - `absolute` -- a `bool` indicating whether the URL is absolute
 - `unicode` -- a unicode version of the URL
-- `utf8` -- a utf-8 verison of the URL
 
-Contentious Issues
-==================
-Some questions that I still have outstanding:
-
-Strip ?'s From Query Names?
----------------------------
-If I have a query string `?a=1&?b=2`, and I sanitize the params, should the
-resulting query string be `?a=1&?b=2` or `?a=1&b=2` (note the missing `?`
-before the `b` in the second version).
-
-If not in the above example, what about in `?????a=1`? Should the resulting
-query string be a mere `?a=1`?
-
-Properties
-----------
-I'd like to support lazily-evaluated properties like `hostname`, `netloc`, etc.
-
-Dictionary Access
------------------
-I'd like to support dictionary-style access to parameters and query arguments,
-though I'm not sure how to best to do it. My current thinking is that there will
-be one way of getting params, one for queries, and then one for either.
 
 Authors
 =======
