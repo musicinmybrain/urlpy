@@ -5,7 +5,6 @@ Minimal URL parsing and cleanup.
 This is derived from from Moz url.py and simplified to run on Python 2 and
 Python 3 using a pure Python library.
 
-
 At the heart of the `url` package is the `URL` object. You can get one by
 passing in a unicode or string object into the top-level `parse` method. All
 strings asre assumed to be Unicode:
