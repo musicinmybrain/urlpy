@@ -27,16 +27,18 @@ from setuptools import setup
 
 setup(
     name='urlpy',
-    version='0.1',
-    description='Simple URL parsing and equivalence',
+    version='0.5',
+    description='Simple URL parsing, canonicalization and equivalence.',
     long_description='''
-Some helper functions for parsing URLs, sanitizing them, normalizing them in pure python.
 
-This includes support for escaping, unescaping, cleaning parameter and query strings, 
-and a little more sanitization.
+A library with helper functions to parse URLs, and sanitize and normalize them
+in pure python.
 
-This version is a friendly fork of the upstream from Moz to keep a pure Python
-version around to run on Python 2 and 3 and all OSes.
+This includes support for escaping, unescaping, cleaning and sorting parameters
+and query strings, and a little more sanitization.
+
+This version is a friendly fork of the upstream url.py from Moz to keep a pure
+Python version around to run on Python 2 and 3 and all OSes.
 ''',
     author='nexB Inc (based on code from Dan Lecocq)',
     url='http://github.com/nexB/urlpy',
@@ -49,6 +51,6 @@ version around to run on Python 2 and 3 and all OSes.
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP'],
     install_requires=[
-        'publicsuffix2',
+        'publicsuffix2 >= 2.20191221',
     ],
 )
