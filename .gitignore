@@ -6,3 +6,5 @@ url.egg-info/
 /.pytest_cache/
 /tmp/
 /urlpy.egg-info/
+/bin/
+/lib/
