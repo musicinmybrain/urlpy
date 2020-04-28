@@ -64,7 +64,7 @@ py3 = _sys_v0 == 3
 
 
 # For publicsuffix utilities
-from publicsuffix import PublicSuffixList
+from publicsuffix2 import PublicSuffixList
 psl = PublicSuffixList()
 
 
